@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdvenp7a68hvh"]
+
+[ext_resource type="Script" path="res://scripts/Menu/Menu.gd" id="1_whcsq"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_whcsq")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 0
+
+[node name="Container" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/Container"]
+layout_mode = 2
+text = "Game Mode"
+
+[node name="MultiButton" type="Button" parent="CenterContainer/Container"]
+layout_mode = 2
+text = "Multiplayer"
+
+[node name="SingleButton" type="Button" parent="CenterContainer/Container"]
+layout_mode = 2
+text = "Singleplayer"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[connection signal="pressed" from="CenterContainer/Container/MultiButton" to="." method="_on_MultiButton_pressed"]
+[connection signal="pressed" from="CenterContainer/Container/SingleButton" to="." method="_on_SingleButton_pressed"]

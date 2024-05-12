@@ -1,0 +1,64 @@
+[gd_scene load_steps=7 format=3 uid="uid://tn47crvcqkp3"]
+
+[ext_resource type="Script" path="res://scripts/Game/Player.gd" id="1_y4hnq"]
+[ext_resource type="Texture2D" uid="uid://1aiw2836sjre" path="res://icon.svg" id="2_0b5tu"]
+[ext_resource type="Script" path="res://scripts/Game/Canon.gd" id="3_g60lk"]
+
+[sub_resource type="CanvasItemMaterial" id="2"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(77, 71)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(89, 20)
+
+[node name="Tank" type="CharacterBody2D"]
+position = Vector2(149, 112)
+script = ExtResource("1_y4hnq")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(-1, -2)
+scale = Vector2(0.585937, 0.5625)
+texture = ExtResource("2_0b5tu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+material = SubResource("2")
+position = Vector2(-1, -1)
+shape = SubResource("1")
+
+[node name="Canon" type="CharacterBody2D" parent="."]
+script = ExtResource("3_g60lk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Canon"]
+position = Vector2(34.5, 0)
+shape = SubResource("3")
+
+[node name="Sprite" type="Sprite2D" parent="Canon"]
+position = Vector2(24.5, 3.8147e-06)
+scale = Vector2(0.820313, 0.15625)
+texture = ExtResource("2_0b5tu")
+
+[node name="FirePoint" type="Marker2D" parent="Canon"]
+position = Vector2(93, -1)
+
+[node name="Aim" type="Area2D" parent="Canon"]
+collision_layer = 2
+
+[node name="Sprite" type="Sprite2D" parent="Canon/Aim"]
+position = Vector2(448.5, 0)
+scale = Vector2(6.61719, 0.03125)
+texture = ExtResource("2_0b5tu")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="LifeBar1" type="Sprite2D" parent="Node2D"]
+position = Vector2(-37, -70)
+scale = Vector2(0.5, 0.5)
+
+[node name="LifeBar2" type="Sprite2D" parent="Node2D"]
+position = Vector2(5, -70)
+scale = Vector2(0.5, 0.5)
+
+[node name="LifeBar3" type="Sprite2D" parent="Node2D"]
+position = Vector2(46, -70)
+scale = Vector2(0.5, 0.5)
