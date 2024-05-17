@@ -2,7 +2,6 @@ extends Node
 
 const Packet = preload("res://scripts/Protocol/Packet.gd").new().Packet
 const Handshake = preload("res://scripts/Protocol/Handshake.gd").new().Handshake
-const Uuid = preload("res://scripts/Protocol/uuid.gd").new().Uuid
 
 class Connection :
 	enum State {HANDSHAKE = 0, CONFIG = 1, QUEUE = 2, PLAY = 3}
@@ -12,18 +11,17 @@ class Connection :
 	var threadWrite: Thread
 	var threadRead: Thread
 	
-	var queue_pos: int
+	var uuid: String
 	
-	func _init(addr, port):
+	signal connection_achieved
+	
+	func _init(addr, port, player_uuid):
 		print("Connecting to %s:%d" % [addr, port])
-
-
 		if stream_peer_tcp.connect_to_host(addr, port) != OK:
 			print("Error connecting to host.")
-		while !is_Connected():
-			print("Not connected yet... Retrying...")
-		print(stream_peer_tcp.get_status())
-	
+		stream_peer_tcp.poll()
+		uuid = player_uuid
+
 	func is_Connected():
 		stream_peer_tcp.poll()
 		return stream_peer_tcp.get_status() == stream_peer_tcp.STATUS_CONNECTED 
@@ -61,40 +59,31 @@ class Connection :
 							State.PLAY:
 								print("Play : Données reçues : ", data[1])
 						print("Données reçues : ", data[1])
-			else:
-				print("Déconnecté du serveur")
-	
-	func send(data: PackedByteArray) -> bool:
-		stream_peer_tcp.poll()
-		if is_Connected():
-			print("Error: Stream is not currently connected.")
-			return false
-		print(data)
-		var error: int = stream_peer_tcp.put_data(data)
-		if error != OK:
-			print("Error writing to stream: ", error)
-			return false
-		return true
-
+			"""else:
+				print("Déconnecté du serveur")"""
+				
 	#Handshake part
 	func send_handshake_packet():
+		stream_peer_tcp.poll()
 		var packet_id = PackedByteArray([0x00])
 		stream_peer_tcp.put_data(packet_id)
 		print("Paquet de handshake envoyé")	
 
 	func handshake_handler():
 		print("Successfully handshaked")
+		emit_signal("handshake_received")
 		state = State.CONFIG
 		
 	#---End of Handshake part---
-	#Config Part 
-	var player_uuid = Uuid.v4()
-	var uuid_bytes = player_uuid.to_utf8_buffer()
+	#Config Part
 
+	var uuid_bytes
 	func send_config_packet():
+		uuid_bytes = uuid.to_utf8_buffer()
+		print(uuid_bytes)
+		stream_peer_tcp.poll()
 		var packet_content = PackedByteArray([0x00])
-		for byte in uuid_bytes :
-			print(byte)
+		for byte in uuid_bytes:
 			packet_content.append(byte)
 		stream_peer_tcp.put_data(packet_content)
 		print(packet_content)
@@ -104,6 +93,7 @@ class Connection :
 		var data = get_packet_data(packet_data)
 		if uuid_bytes == data:
 			print("Successfully configured entering in queue")
+			emit_signal("config_received")
 			state = State.QUEUE
 		else :
 			print("Bad data :", data)
@@ -112,17 +102,22 @@ class Connection :
 	func queue_handle(packet_data: PackedByteArray):
 		var data = get_packet_data(packet_data)
 		print("Pos in queue : ", data)
+		emit_signal("queue_received")
 	
 	func send_queue_packet():
+		stream_peer_tcp.poll()
 		var packet_id = PackedByteArray([0x00])
 		stream_peer_tcp.put_data(packet_id)
-		print("Paquet de queue envoyé")	
+		print("Paquet de queue envoyé")
+		connection_achieved.emit()
 	#---End of queue part---
 	#Keep Alive Part
 	func keep_alive_handle():
+		stream_peer_tcp.poll()
 		var packet_id = PackedByteArray([0x99])
 		stream_peer_tcp.put_data(packet_id)
 		print("Paquet de keep alive envoyé")	
+		
 	#---End of keep alive part---
 	
 	func get_packet_data(data : PackedByteArray):
@@ -137,6 +132,3 @@ class Connection :
 	
 	func get_packet_id(data : PackedByteArray):
 		return data[0]
-
-
-

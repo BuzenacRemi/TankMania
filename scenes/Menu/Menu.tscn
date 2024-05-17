@@ -9,6 +9,7 @@ script = ExtResource("1_whcsq")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 0
+use_top_left = true
 
 [node name="Container" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2

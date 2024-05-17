@@ -9,16 +9,39 @@ var player_instance_1 = player_scene.instantiate()
 var player_instance_2 = enemy_scene.instantiate()
 var playerNodeID
 
+var username: String
+var password: String
+
+var player_uuid: String
+
 var threadGame: Thread
 
-var connection = Connection.new("127.0.0.1", 65432)
+signal receive_uuid
 
-func _init():
+func _ready():
+	$LoginOverlay.hide()
+	$RegisterOverlay.hide()
+	$ChoiceOverlay.show()
+	await receive_uuid
+	var connection = Connection.new("127.0.0.1", 65432, self.player_uuid) 
 	connection.start_connect()
-	while !connection.is_Connected():
-		spawn_terrain()
-		spawn_players()
-		_game()
+	await connection.connection_achieved
+	game()
+
+func set_uid():
+	var headers = ['Content-Type: application/json']
+	
+	var data = {
+		"username": "TaGrandBisBisBis",
+		"password": "TestPass"
+	}
+	var body = JSON.stringify(data)
+	$HTTPRequest.request("http://0.0.0.0:5000/users/auth", headers, HTTPClient.METHOD_POST, body)
+
+func game():
+	spawn_terrain()
+	spawn_players()
+	_game()
 
 func _game():
 	player_instance_1.connect("get_position_and_look", _on_tank_moved)
@@ -38,7 +61,6 @@ func spawn_players():
 
 	add_child(player_instance_1)
 	playerNodeID = player_instance_1.get_index()
-	print(player_instance_1.name)
 	add_child(player_instance_2)
 
 func _on_tank_moved(ppal):
@@ -47,14 +69,14 @@ func _on_tank_moved(ppal):
 	for b in var_to_bytes(pos):
 		packet_content.append(b)
 	#print(packet_content)
-	connection.send(packet_content)
+	#connection.send(packet_content)
 
 func _on_canon_rotate(rot):
 	var packet_content = [0x01]
 	for b in var_to_bytes(rot):
 		packet_content.append(b)
 	#print(packet_content)
-	connection.send(packet_content.duplicate())
+	#connection.send(packet_content.duplicate())
 
 
 func _on_bullet_shooted(bul):
@@ -67,7 +89,46 @@ func _bullet_moved(pos):
 	
 func _bullet_collide():
 	print("Bullet collide !")
+
+func _on_login_overlay_confirmed():
+	set_uid()
+
+func _on_http_request_request_completed(result, response_code, headers, body):
+	player_uuid = JSON.parse_string(body.get_string_from_utf8()).uuid
+	print("UUID : ", player_uuid)
+	emit_signal("receive_uuid")
+
+
+func _on_open_login_overlay_pressed():
+	$LoginOverlay.show()
+	$ChoiceOverlay.hide()
+
+
+func _on_open_register_overlay_pressed():
+	$RegisterOverlay.show()
+	$ChoiceOverlay.hide()
+
+
+func _on_register_overlay_confirmed():
+	var headers = ['Content-Type: application/json']
 	
+	var data = {
+		"username": "TaGrandBisBisBis",
+		"password": "TestPass"
+	}
+	var body = JSON.stringify(data)
+	$RegisterRequest.request("http://0.0.0.0:5000/users", headers, HTTPClient.METHOD_POST, body)
+
+func _on_register_request_request_completed(result, response_code, headers, body):
+	$RegisterOverlay.hide()
+	$LoginOverlay.show()
 
 
+func _on_register_overlay_canceled():
+	$RegisterOverlay.hide()
+	$ChoiceOverlay.show()
 
+
+func _on_login_overlay_canceled():
+	$LoginOverlay.hide()
+	$ChoiceOverlay.show()

@@ -10,4 +10,5 @@ func _on_try_connection_pressed():
 	pass
 
 
-
+func _on_accept_dialog_confirmed():
+	pass # Replace with function body.
