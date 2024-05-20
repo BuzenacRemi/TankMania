@@ -19,9 +19,6 @@ func _ready():
 	$Canon.connect("on_canon_rotate", handle_canon_rotation)
 	$Canon.connect("bullet_shooted", handle_bullet_shooted)
 
-func _enter_tree():
-	set_multiplayer_authority(name.to_int())
-
 func get_input():
 	rotation_dir = 0
 	velocity = Vector2()

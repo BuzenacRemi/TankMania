@@ -61,6 +61,17 @@ class Connection :
 						print("Données reçues : ", data[1])
 			"""else:
 				print("Déconnecté du serveur")"""
+	
+	func send(data: PackedByteArray) -> bool:
+		stream_peer_tcp.poll()
+		if !is_Connected():
+			print("Error: Stream is not currently connected.")
+			return false
+		var error: int = stream_peer_tcp.put_data(data)
+		if error != OK:
+			print("Error writing to stream: ", error)
+			return false
+		return true
 				
 	#Handshake part
 	func send_handshake_packet():
@@ -71,45 +82,43 @@ class Connection :
 
 	func handshake_handler():
 		print("Successfully handshaked")
-		emit_signal("handshake_received")
 		state = State.CONFIG
 		
 	#---End of Handshake part---
 	#Config Part
-
 	var uuid_bytes
 	func send_config_packet():
 		uuid_bytes = uuid.to_utf8_buffer()
-		print(uuid_bytes)
 		stream_peer_tcp.poll()
 		var packet_content = PackedByteArray([0x00])
 		for byte in uuid_bytes:
 			packet_content.append(byte)
 		stream_peer_tcp.put_data(packet_content)
-		print(packet_content)
 		print("Paquet de config envoyé")
 
 	func config_handle(packet_data : PackedByteArray):
 		var data = get_packet_data(packet_data)
 		if uuid_bytes == data:
-			print("Successfully configured entering in queue")
-			emit_signal("config_received")
 			state = State.QUEUE
+			print("Successfully configured entering in queue")
 		else :
 			print("Bad data :", data)
 	#---End of config part---
 	#Queue Part
 	func queue_handle(packet_data: PackedByteArray):
 		var data = get_packet_data(packet_data)
-		print("Pos in queue : ", data)
-		emit_signal("queue_received")
+		if data == PackedByteArray([45, 49]):
+			print("Queue finished")
+			connection_achieved.emit()
+		else :
+			print("Pos in queue : ", data)
+			send_queue_packet()
 	
 	func send_queue_packet():
 		stream_peer_tcp.poll()
 		var packet_id = PackedByteArray([0x00])
 		stream_peer_tcp.put_data(packet_id)
 		print("Paquet de queue envoyé")
-		connection_achieved.emit()
 	#---End of queue part---
 	#Keep Alive Part
 	func keep_alive_handle():
@@ -117,9 +126,10 @@ class Connection :
 		var packet_id = PackedByteArray([0x99])
 		stream_peer_tcp.put_data(packet_id)
 		print("Paquet de keep alive envoyé")	
-		
 	#---End of keep alive part---
+	#---Play Part---
 	
+	#---End of play part---
 	func get_packet_data(data : PackedByteArray):
 		var is_first = true
 		var content_arr = PackedByteArray()

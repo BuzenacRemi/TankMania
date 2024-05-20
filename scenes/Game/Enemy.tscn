@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://ykitewq6td3q"]
 
 [ext_resource type="Texture2D" uid="uid://1aiw2836sjre" path="res://icon.svg" id="1_a63do"]
-[ext_resource type="Script" path="res://scripts/Game/Canon.gd" id="2_h3tcx"]
+[ext_resource type="Script" path="res://scripts/Game/Enemy.gd" id="1_klr28"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_u8qbt"]
 
@@ -12,6 +12,7 @@ size = Vector2(77, 71)
 size = Vector2(89, 20)
 
 [node name="Enemy" type="Node2D"]
+script = ExtResource("1_klr28")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 position = Vector2(-1, -2)
@@ -24,7 +25,6 @@ position = Vector2(-1, -1)
 shape = SubResource("RectangleShape2D_hwygr")
 
 [node name="Canon" type="CharacterBody2D" parent="."]
-script = ExtResource("2_h3tcx")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Canon"]
 position = Vector2(34.5, 0)
@@ -37,14 +37,6 @@ texture = ExtResource("1_a63do")
 
 [node name="FirePoint" type="Marker2D" parent="Canon"]
 position = Vector2(93, -1)
-
-[node name="Aim" type="Area2D" parent="Canon"]
-collision_layer = 2
-
-[node name="Sprite" type="Sprite2D" parent="Canon/Aim"]
-position = Vector2(448.5, 0)
-scale = Vector2(6.61719, 0.03125)
-texture = ExtResource("1_a63do")
 
 [node name="Node2D" type="Node2D" parent="."]
 

@@ -33,8 +33,6 @@ func shoot():
 	var bullet_instance = bullet_scene.instantiate()
 	bullet_instance.position = fire_point.global_position
 	var direction = (get_global_mouse_position() - fire_point.global_position).normalized()
-
-
 	bullet_instance.initialize(direction.angle())
 	owner.get_parent().add_child(bullet_instance)
 	bullet_shooted.emit(bullet_instance)

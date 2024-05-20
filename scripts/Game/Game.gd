@@ -16,6 +16,8 @@ var player_uuid: String
 
 var threadGame: Thread
 
+var connection
+
 signal receive_uuid
 
 func _ready():
@@ -23,9 +25,8 @@ func _ready():
 	$RegisterOverlay.hide()
 	$ChoiceOverlay.show()
 	await receive_uuid
-	var connection = Connection.new("127.0.0.1", 65432, self.player_uuid) 
-	connection.start_connect()
-	await connection.connection_achieved
+	connection = Connection.new("127.0.0.1", 65432, self.player_uuid) 
+	await connection.start_connect()
 	game()
 
 func set_uid():
@@ -65,24 +66,33 @@ func spawn_players():
 
 func _on_tank_moved(ppal):
 	var pos = ppal.pos
+	var rot = ppal.look
 	var packet_content = [0x00]
-	for b in var_to_bytes(pos):
+	var data = {
+		position = pos,
+		rotation = rot
+	}
+	for b in var_to_bytes(data):
 		packet_content.append(b)
 	#print(packet_content)
-	#connection.send(packet_content)
+	connection.send(packet_content)
+	
 
 func _on_canon_rotate(rot):
 	var packet_content = [0x01]
 	for b in var_to_bytes(rot):
 		packet_content.append(b)
 	#print(packet_content)
-	#connection.send(packet_content.duplicate())
+	connection.send(packet_content.duplicate())
 
 
 func _on_bullet_shooted(bul):
 	print("Bullet shooted")
 	bul.connect("_on_bullet_collide", _bullet_collide)
 	bul.connect("_on_bullet_moved", _bullet_moved)
+	var packet_content = [0x02]
+	
+	
 
 func _bullet_moved(pos):
 	print("Bullet pos :" , pos)
@@ -97,7 +107,6 @@ func _on_http_request_request_completed(result, response_code, headers, body):
 	player_uuid = JSON.parse_string(body.get_string_from_utf8()).uuid
 	print("UUID : ", player_uuid)
 	emit_signal("receive_uuid")
-
 
 func _on_open_login_overlay_pressed():
 	$LoginOverlay.show()
