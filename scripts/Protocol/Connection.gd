@@ -3,9 +3,12 @@ extends Node
 const Packet = preload("res://scripts/Protocol/Packet.gd").new().Packet
 const Handshake = preload("res://scripts/Protocol/Handshake.gd").new().Handshake
 
+
 class Connection :
 	enum State {HANDSHAKE = 0, CONFIG = 1, QUEUE = 2, PLAY = 3}
 	var state : State
+	
+	var enemy_pos: Vector2
 
 	var stream_peer_tcp : StreamPeerTCP = StreamPeerTCP.new()
 	var threadWrite: Thread
@@ -31,6 +34,8 @@ class Connection :
 		threadRead.start(_handle_packets)
 		state = State.HANDSHAKE
 		send_handshake_packet()
+		await connection_achieved
+		print("Connection achived") 
 		
 	func _handle_packets():
 		while true :
@@ -57,8 +62,13 @@ class Connection :
 									153:
 										keep_alive_handle()
 							State.PLAY:
-								print("Play : Données reçues : ", data[1])
-						print("Données reçues : ", data[1])
+								print(get_packet_id(data[1]))
+								match get_packet_id(data[1]):
+									48:
+										var pos = bytes_to_var(get_packet_data(data[1]))
+										enemy_pos = Vector2(pos[0], pos[1])
+									153:
+										keep_alive_handle()
 			"""else:
 				print("Déconnecté du serveur")"""
 	
@@ -72,7 +82,7 @@ class Connection :
 			print("Error writing to stream: ", error)
 			return false
 		return true
-				
+
 	#Handshake part
 	func send_handshake_packet():
 		stream_peer_tcp.poll()
@@ -109,6 +119,7 @@ class Connection :
 		var data = get_packet_data(packet_data)
 		if data == PackedByteArray([45, 49]):
 			print("Queue finished")
+			state = State.PLAY
 			connection_achieved.emit()
 		else :
 			print("Pos in queue : ", data)
@@ -142,3 +153,6 @@ class Connection :
 	
 	func get_packet_id(data : PackedByteArray):
 		return data[0]
+	
+	func get_enemy_pos():
+		return enemy_pos

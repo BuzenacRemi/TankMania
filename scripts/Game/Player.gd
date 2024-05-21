@@ -3,16 +3,12 @@ extends CharacterBody2D
 @export var speed = 10
 @export var rotation_speed = 1.5
 
-signal get_position_and_look
+signal get_position
 signal get_canon_orientation
 signal bullet_shooted
 
 var last_position
 var rotation_dir = 0
-
-class PlayerPositionAndLook:
-	var pos
-	var look
 
 func _ready():
 	last_position = position
@@ -33,12 +29,10 @@ func get_input():
 		
 
 func _physics_process(delta):
-	if position != last_position:
-		var data = PlayerPositionAndLook.new()
-		data.look = rotation
-		data.pos = position
-		get_position_and_look.emit(data)
-		last_position = position
+	get_position.emit(position)
+	'''if position != last_position:
+		
+		last_position = position'''
 	get_input()
 	rotation += rotation_dir * rotation_speed * delta
 	position += velocity * delta * speed
