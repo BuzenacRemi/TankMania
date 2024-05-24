@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://dikuo5x66mbu8"]
+
+[ext_resource type="Script" path="res://scripts/Game/Puppet_Bullet.gd" id="1_1abfe"]
+[ext_resource type="Texture2D" uid="uid://1aiw2836sjre" path="res://icon.svg" id="1_4813i"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pyuk1"]
+size = Vector2(27.5, 29.5)
+
+[node name="PuppetBullet" type="Node2D"]
+script = ExtResource("1_1abfe")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(1, 0)
+scale = Vector2(0.210938, 0.242188)
+texture = ExtResource("1_4813i")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_pyuk1")

@@ -35,8 +35,8 @@ func set_uid():
 	var headers = ['Content-Type: application/json']
 	
 	var data = {
-		"username": "TaGrandBisBisBis",
-		"password": "TestPass"
+		"username": $LoginOverlay/CenterContainer/HBoxContainer/VBoxContainer/UsernameField.text,
+		"password": $LoginOverlay/CenterContainer/HBoxContainer/VBoxContainer/UsernameField2.text
 	}
 	var body = JSON.stringify(data)
 	$HTTPRequest.request("http://0.0.0.0:5000/users/auth", headers, HTTPClient.METHOD_POST, body)
@@ -129,8 +129,8 @@ func _on_register_overlay_confirmed():
 	var headers = ['Content-Type: application/json']
 	
 	var data = {
-		"username": "TaGrandBisBisBis",
-		"password": "TestPass"
+		"username": $RegisterOverlay/CenterContainer/HBoxContainer/VBoxContainer/UsernameField.text,
+		"password": $RegisterOverlay/CenterContainer/HBoxContainer/VBoxContainer/UsernameField2.text
 	}
 	var body = JSON.stringify(data)
 	$RegisterRequest.request("http://0.0.0.0:5000/users", headers, HTTPClient.METHOD_POST, body)
